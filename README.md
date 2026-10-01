@@ -1,6 +1,6 @@
 # Strafe Analyzer
 
-![Game: CS:Source](https://img.shields.io/badge/game-CS%3ASource-yellow)
+[![Game: CS:Source](https://img.shields.io/badge/game-CS%3ASource-yellow)](https://store.steampowered.com/app/240/CounterStrike_Source/)
 ![Platform: Windows](https://img.shields.io/badge/platform-Windows-blue)
 [![Open issues](https://img.shields.io/github/issues/neeuqpart/spicys-strafe-analyzer)](https://github.com/neeuqpart/spicys-strafe-analyzer/issues)
 ![Language: C++](https://img.shields.io/badge/language-C%2B%2B-pink)
