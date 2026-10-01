@@ -1,0 +1,250 @@
+#include "menu.h"
+#include "zgui.hh"
+
+#include "../sdk+/sdk.h"
+#include "../sdk+/drawing.h"
+
+#include "../analyzer/AnalyzerEnums.h"
+
+
+
+c_menu g_menu;
+
+/// <summary>
+/// Calls the enabled zgui tab function to handle menu draws
+/// </summary>
+/// <param name="game"></param>
+void c_menu::Render(std::string game)
+{
+	zgui::poll_input(game.c_str());
+	if (zgui::begin_window("spicy's strafe analyzer", { 615, 357 }, render::moon_font, zgui::zgui_window_flags_none))
+	{
+		if (zgui::tab_button("Menu", { 40, 30 }, tabs.mainMenu))
+		{
+			tabs.mainMenu = true;
+			tabs.strafeTrainer = false;
+			tabs.keys = false;
+			tabs.routetool = false;
+			tabs.misc = false;
+		}
+
+		if (zgui::tab_button("Trainer", { 40, 30 }, tabs.strafeTrainer))
+		{
+			tabs.mainMenu = false;
+			tabs.strafeTrainer = true;
+			tabs.keys = false;
+			tabs.routetool = false;
+			tabs.misc = false;
+		}
+
+		if (zgui::tab_button("Keys", { 40, 30 }, tabs.keys))
+		{
+			tabs.mainMenu = false;
+			tabs.strafeTrainer = false;
+			tabs.keys = true;
+			tabs.routetool = false;
+			tabs.misc = false;
+		}
+
+		if (zgui::tab_button("Route", { 40, 30 }, tabs.routetool))
+		{
+			tabs.mainMenu = false;
+			tabs.strafeTrainer = false;
+			tabs.keys = false;
+			tabs.routetool = true;
+			tabs.misc = false;
+		}
+
+		if (zgui::tab_button("Misc", { 40, 30 }, tabs.misc))
+		{
+			tabs.mainMenu = false;
+			tabs.strafeTrainer = false;
+			tabs.keys = false;
+			tabs.routetool = false;
+			tabs.misc = true;
+		}
+
+		//Call functions now that the tabs are properly set
+
+		if (tabs.mainMenu) MainMenuTab();
+
+		if (tabs.strafeTrainer) StrafeTrainerTab();
+
+		if (tabs.keys) KeysTab();
+
+		if (tabs.routetool) RouteToolTab();
+
+		if (tabs.misc) MiscTab();
+
+		zgui::end_window();
+	}
+
+	// Manage cursor state and render custom cursor
+	if (Interfaces::surface)
+	{
+		static bool last_menu_state = false;
+		if (menu_open != last_menu_state)
+		{
+			last_menu_state = menu_open;
+			if (!menu_open)
+				Interfaces::surface->lock_cursor();
+		}
+
+		if (menu_open)
+		{
+			render::draw_cursor();
+		}
+	}
+}
+
+
+void c_menu::MainMenuTab()
+{
+	zgui::next_column(50, 0);
+	zgui::begin_groupbox("", { 530, 320 }, 0);
+	{
+		//FREE
+		zgui::text("****NEWS**FLASH**** Strafe Analyzer (free)");
+		zgui::text("Hello! I hope you enjoy the free practice tool!");
+		zgui::dummy();
+		zgui::text("This project is a continuation of Spicy's Strafe Analyzer.");
+		zgui::text("This version supports Counter-Strike: Source (CS:S) only.");
+		zgui::text("Please share this tool with your friends. Thank you!");
+		zgui::dummy();
+		zgui::text("Special thanks to Spicy for creating the original Strafe Analyzer.");
+		zgui::text("You can support his work on Patreon:");
+		if (zgui::clickable_text("https://www.patreon.com/spicycurrey"))
+			ShellExecuteA(nullptr, "open", "https://www.patreon.com/spicycurrey", nullptr, nullptr, SW_SHOWNORMAL);
+	}
+	zgui::end_groupbox();
+}
+
+
+void c_menu::StrafeTrainerTab()
+{
+	zgui::next_column(50, 0);
+	zgui::begin_groupbox("", { 260, 320 }, 0);
+	{
+		zgui::checkbox("Strafe Trainer #StrafeTrainer", g_menu.strafetrainer.enabled);
+		zgui::checkbox("Graph Smoothing #Smooth", g_menu.strafetrainer.smooth);
+		zgui::checkbox("Invert graph direction #Invert", g_menu.strafetrainer.invertDir);
+		zgui::dummy();
+
+		zgui::combobox("Graph Style #GraphStyle", { "Filled Graph", "Line Graph", "Horizontal", "Vertical" }, g_menu.strafetrainer.graphType);
+
+		if (g_menu.strafetrainer.graphType == static_cast<int>(StrafeTrainerGraphType::GRAPH_LINE)
+			|| g_menu.strafetrainer.graphType == static_cast<int>(StrafeTrainerGraphType::GRAPH_HORIZONTAL)
+				|| g_menu.strafetrainer.graphType == static_cast<int>(StrafeTrainerGraphType::GRAPH_VERTICAL))
+		{
+			zgui::slider_int("Line Size #lineSize", 1, 10, g_menu.strafetrainer.lineSize, 50);
+		}
+		zgui::dummy();
+
+		zgui::checkbox("Centered? #stCentered", g_menu.strafetrainer.centered);
+		zgui::slider_int("X-position #stXoffset", 0, 2560, g_menu.strafetrainer.xOffset, 50);
+		zgui::same_line();
+		zgui::slider_int("Y-position #stYoffset", 0, 1440, g_menu.strafetrainer.yOffset, 50);
+
+	}
+	zgui::end_groupbox();
+
+	zgui::next_column(270, 0);
+	zgui::begin_groupbox("", { 260, 320 }, 0);
+	{
+		zgui::slider_int("History Size #historySize", 0, 500, g_menu.strafetrainer.historySize, 150);
+		zgui::slider_int("Data Width #DataWidth", 1, 15, g_menu.strafetrainer.dataWidth, 150);
+		zgui::slider_int("Data Height #DataHeight", 1, 40, g_menu.strafetrainer.dataHeight, 150);
+		zgui::slider_float("Speed Loss Tolerance #speedLossTolerance", 0.01, 5, g_menu.strafetrainer.speedLossTolerance);
+
+		zgui::dummy();
+
+		zgui::text("Perf Angle Color");
+		zgui::colorpicker("Perf Angle #perfColor", g_menu.strafetrainer.colors.perfColor);
+		zgui::text("Synced Color");
+		zgui::colorpicker("Synced #Synced", g_menu.strafetrainer.colors.synced);
+		zgui::text("UnSynced Color");
+		zgui::colorpicker("UnSynced #notSynced", g_menu.strafetrainer.colors.notSynced);
+		zgui::text("Counter Strafing Color");
+		zgui::colorpicker("Counter Strafing #CounterStrafe", g_menu.strafetrainer.colors.counterStrafe);
+	}
+	zgui::end_groupbox();
+}
+
+
+void c_menu::KeysTab()
+{
+	zgui::next_column(50, 0);
+	zgui::begin_groupbox("", { 260, 320 });
+	{
+		zgui::checkbox("Sync Trainer #syncTrainer", g_menu.synctrainer.enabled);
+		zgui::checkbox("Stats #KeypressStats", g_menu.synctrainer.statistics);
+		zgui::slider_int("Keypress History #KeypressHistory", 1, 15, g_menu.synctrainer.strafeHistorySize, 150);
+	}
+	zgui::end_groupbox();
+
+	zgui::next_column(270, 0);
+	zgui::begin_groupbox("", { 260, 320 }, 0);
+	{
+		zgui::text("Color Even");
+		zgui::colorpicker("Color Even #STLeft", g_menu.synctrainer.colors.leftDir);
+		zgui::text("Color Odd");
+		zgui::colorpicker("Color Odd #STRight", g_menu.synctrainer.colors.rightDir);
+	}
+	zgui::end_groupbox();
+}
+
+
+void c_menu::RouteToolTab()
+{
+	zgui::next_column(50, 0);
+	zgui::begin_groupbox("", { 260, 320 });
+	{
+		zgui::checkbox("Open record route menu #RouteMenu", g_menu.routetool.menu.enabled);
+		zgui::checkbox("Draw recorded route #DrawRoute", g_menu.routetool.draw.enabled);
+
+		zgui::dummy();
+
+		zgui::combobox("Path Style #PathStyle", { "Line Path", "Dot Path" }, g_menu.routetool.draw.pathType);
+		zgui::slider_int("Draw Distance (units) #PathDrawDistance", 1, 2000, g_menu.routetool.drawDistance, 50);
+
+		zgui::dummy();
+
+		zgui::checkbox("Show speed loss #PathShowSpeedLoss", g_menu.routetool.showSpeedLoss);
+	}
+	zgui::end_groupbox();
+
+	zgui::next_column(270, 0);
+	zgui::begin_groupbox("", { 260, 320 }, 0);
+	{
+		zgui::slider_int("Path Line Size #PathLineSize", 1, 10, g_menu.routetool.lineSize, 50);
+		zgui::text("Path Default");
+		zgui::colorpicker("#PathDefault", g_menu.routetool.colors.pathDefault);
+		zgui::text("Path Lost Speed");
+		zgui::colorpicker("#PathLost", g_menu.routetool.colors.pathLostSpeed);
+		zgui::text("Path OnGround");
+		zgui::colorpicker("#PathOnGround", g_menu.routetool.colors.pathOnGround);
+		zgui::text("Path Crouched");
+		zgui::colorpicker("#PathOnCrouch", g_menu.routetool.colors.pathOnCrouch);
+	}
+	zgui::end_groupbox();
+}
+
+
+void c_menu::MiscTab()
+{
+	zgui::next_column(50, 0);
+	zgui::begin_groupbox("", { 260, 320 });
+	{
+		zgui::checkbox("Scroll graph #ScrollGraph", g_menu.scrollgraph.enabled);
+
+		zgui::checkbox("Velocity graph #VelocityGraph", g_menu.velocitygraph.enabled);
+	}
+	zgui::end_groupbox();
+
+	zgui::next_column(270, 0);
+	zgui::begin_groupbox("", { 260, 320 }, 0);
+	{
+
+	}
+	zgui::end_groupbox();
+}
