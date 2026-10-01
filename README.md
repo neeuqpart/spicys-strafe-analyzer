@@ -36,7 +36,9 @@ This is a practice tool that helps players improve their movement by analyzing p
 
 ## Download
 
-[Download the source ZIP](https://github.com/neeuqpart/spicys-strafe-analyzer/archive/refs/heads/main.zip), extract it, and follow the build instructions below to create the DLL and loader.
+[Download the latest release](https://github.com/neeuqpart/spicys-strafe-analyzer/releases/latest) for the ready-to-use loader and DLL. Extract the ZIP and follow the **Load and use** instructions below.
+
+To build it yourself, [download the source ZIP](https://github.com/neeuqpart/spicys-strafe-analyzer/archive/refs/heads/main.zip), extract it, and follow the build instructions below.
 
 ## Build requirements
 
