@@ -63,13 +63,22 @@ Both projects are built. The resulting files are:
 
 ## Build without the Visual Studio IDE
 
-Run `build.cmd` from the extracted folder. It locates Visual Studio 2022 or its Build Tools automatically and builds both projects in Release x64.
+The full Visual Studio IDE is optional. Install **Visual Studio 2022 Build Tools** with the **Desktop development with C++** workload, including **MSVC v143** and a **Windows SDK**.
 
-Alternatively, open an **x64 Native Tools Command Prompt for VS 2022**, change to the extracted folder, and run:
+1. Open **x64 Native Tools Command Prompt for VS 2022** from the Windows Start menu. This sets up the compiler and MSBuild environment.
+2. Change to the extracted source folder containing `strafe analyzer.sln`. Replace the example path below with your folder's location:
+
+   ```bat
+   cd /d "D:\Projects\strafe-analyzer-master"
+   ```
+
+3. Build the solution:
 
 ```bat
 msbuild "strafe analyzer.sln" /p:Configuration=Release /p:Platform=x64
 ```
+
+After a successful build, the DLL and loader are in `x64\Release`. No build script is required. If `msbuild` is not recognized, use the Native Tools Command Prompt rather than a regular Command Prompt. If the build reports a missing toolset or SDK, add the required components through Visual Studio Installer.
 
 ## Load and use
 
